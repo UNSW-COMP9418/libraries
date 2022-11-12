@@ -14,17 +14,19 @@ class Factor:
     The probabilities are stored in a n-dimensional numpy array, using the domain and outcomeSpace
     as dimension and row labels respectively.
     '''
-    def __init__(self, domain, outcomeSpace, table=None):
+    def __init__(self, domain, outcomeSpace, table=None, trivial=False):
         '''
         Inititalise a factor with a given domain and outcomeSpace. 
-        All probabilities are set to zero by default.
+        All probabilities are set to uniform distribution by default. 
+        If trivial=True then it creates a trivial factor (all entries equal to one).
         '''
         self.domain = tuple(domain) # tuple of variable names, which may be strings, integers, etc.
         
         if table is None:
             # By default, intitialize with a uniform distribution
             self.table = np.ones(shape=tuple(len(outcomeSpace[var]) for var in self.domain))
-            self.table = self.table/np.sum(self.table)
+            if not trivial:
+                self.table = self.table/np.sum(self.table)
         else:
             self.table = table
             
@@ -124,7 +126,7 @@ class Factor:
             f.outcomeSpace[var] = (value,)
         return f
 
-    def evidence(self, **kwargs):
+    def evidence2(self, **kwargs):
         '''
         Sets evidence by removing the observed variables from the factor domain
         This function must be used to set evidence on all factors before joining,

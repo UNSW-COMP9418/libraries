@@ -63,9 +63,6 @@ class Factor:
         # confirm that any shared variables have the same outcomeSpace
         for var in set(other.domain).intersection(set(self.domain)):
             if self.outcomeSpace[var] != other.outcomeSpace[var]:
-                print(var)
-                print(self.outcomeSpace[var])
-                print(other.outcomeSpace[var])
                 raise IndexError('Incompatible outcomeSpaces. Make sure you set the same evidence on all factors')
 
         # extend current domain with any new variables required

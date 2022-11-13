@@ -55,19 +55,6 @@ class Graph():
                 self.adj_list[node].remove(name)
         del self.adj_list[name]
 
-    def copy(self):
-        return copy.deepcopy(self)
-        
-    def convert_to_undirected(self):
-        '''
-        Assumes that the graph is directed, and creates a reversed version of every edge
-        '''
-        G = self.copy()
-        GT = self.transpose()
-        for vertex in self:
-            G.adj_list[vertex] = G.adj_list[vertex] + GT.adj_list[vertex]
-        return G        
-    
     def add_edge(self, node1, node2, weight=1, directed=True):
         '''
         This function adds an edge. If directed is false, it adds an edge in both directions
@@ -83,8 +70,27 @@ class Graph():
             self.adj_list[node2].append(node1)
             self.edge_weights[(node2,node1)] = weight
 
-    def remove_outgoing_from(self, node1):
-        self.adj_list[node1] = []               
+    def copy(self):
+        '''
+        This function creates a copy of the graph object
+        '''          
+        return copy.deepcopy(self)
+        
+    def convert_to_undirected(self):
+        '''
+        Assumes that the graph is directed, and creates a reversed version of every edge
+        '''
+        G = self.copy()
+        GT = self.transpose()
+        for vertex in self:
+            G.adj_list[vertex] = G.adj_list[vertex] + GT.adj_list[vertex]
+        return G        
+
+    def remove_outgoing_from(self, node):
+        '''
+        Removes all outgoing edges from node
+        '''        
+        self.adj_list[node] = []               
         
     def show(self, directed=True, positions=None):
         """

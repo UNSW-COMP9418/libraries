@@ -122,14 +122,11 @@ class BayesNet():
                 if var in f.domain:
                     # Merge the newFactorDomain list with the selected domain, since we are combining these ones
                     newFactor = newFactor*f
-
-                        
                 else:
                     # otherwise, we leave the factor for the next iteration
                     updatedFactorsList.append(f)
 
             # Now, we need to remove var from the domain of the new factor. We are simulating a summation
-            print(var)
             newFactor = newFactor.marginalize(var)
             # add the new combined factor domain to the list
             updatedFactorsList.append(newFactor)
@@ -203,14 +200,8 @@ class BayesNet():
         
         # remove any q_vars from order
         for var in q_vars:
-            order.remove(var)
-            
-        # remove any q_evi from order
-        for var in q_evi:
-            order.remove(var)            
+            order.remove(var)   
 
-        print(order)            
-            
         # run VE
         factor = self.VE(order)
 

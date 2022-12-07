@@ -104,8 +104,9 @@ class Graph():
         if directed:
             dot = graphviz.Digraph(engine="neato", comment='Directed graph')
         else:
-            dot = graphviz.Graph(engine="neato", comment='Undirected graph')        
-        dot.attr(overlap="false", splines="true")
+            dot = graphviz.Graph(engine="neato", comment='Undirected graph', strict="true")
+        dot.attr(overlap="false", strict="true")
+        
         for v in self.adj_list:
             if positions is not None:
                 dot.node(str(v), pos=positions[v])

@@ -151,7 +151,7 @@ class Graph():
         self.colour = {node: 'white' for node in self.adj_list.keys()} # Create a dictionary with keys as node numbers and values equal to 'white'
         for start in self.colour.keys():
             if self.colour[start] == 'white':
-                self.dfs_recursive(start)        
+                self._dfs_r(start)        
 
     def _find_cycle_r(self, v):
         """

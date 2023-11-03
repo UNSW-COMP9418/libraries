@@ -73,7 +73,7 @@ class BayesNet():
 
         Returns a new NORMALIZED factor will all hidden variables eliminated as evidence set as in q_evi
         """     
-        assert isinstance(q_vars,list) or sinstance(q_vars,tuple), "q_vars should be a list"
+        assert isinstance(q_vars,list) or isinstance(q_vars,tuple), "q_vars should be a list"
         
         f = self.joint()
         

@@ -34,10 +34,12 @@ def estimateFactor(data, var_name, parent_names, outcomeSpace):
     return f
 
 class BayesNet():
-    def __init__(self, graph, outcomeSpace=None, factor_dict=None):
-        self.graph = graph
+    def __init__(self, graph=None, outcomeSpace=None, factor_dict=None):
+        self.graph = Graph()
         self.outcomeSpace = dict()
         self.factors = dict()
+        if graph is not None:
+            self.graph = graph
         if outcomeSpace is not None:
             self.outcomeSpace = outcomeSpace
         if factor_dict is not None:

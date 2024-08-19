@@ -163,6 +163,80 @@ class GaussianFactor:
         
         return K,h,g
 
+    def _extend(self, new_domain):
+        '''
+        This function is for adding variables to the domain, or reordering the variables in the domain
+        Note that self.domain must be contain a subset of the variables in new_domain
+        '''
+        n = len(new_domain)
+        
+        # add zeros to K and h corresponding to the new variables
+        new_K = np.zeros((len(new_domain),len(new_domain)))
+        new_K[:len(self.domain), :len(self.domain)] = self.K
+        new_h = np.zeros(len(new_domain))
+        new_h[:len(self.domain)] = self.h
+        new_g = self.g
+        old_order = list(self.domain) + list(set(new_domain)-set(self.domain))
+        # shuffle rows and columns of K according to new order
+        new_order = []
+        for v in new_domain:
+            new_order.append(old_order.index(v))
+        new_K = new_K[new_order,:]
+        new_K = new_K[:,new_order]
+
+        # shuffle h according to new order
+        new_h = new_h[new_order]
+        
+        return self.__class__(new_domain, K=new_K, h=new_h, g=new_g)
+
+    def join(self, other):
+        '''
+        This function multiplies two factors.
+        '''
+        new_domain = list(self.domain) + list(set(other.domain)-set(self.domain))
+        
+        # extend the domain of self and other
+        new_self = self._extend(new_domain)
+        new_other = other._extend(new_domain)
+        
+        # Calculate the new values of K, h and g
+        K = new_self.K + new_other.K
+        h = new_self.h + new_other.h
+        g = new_self.g + new_other.g
+        
+        # return new joined factor
+        return self.__class__(new_domain,K=K,h=h,g=g)
+    
+    def __mul__(self, other):
+        '''
+        Override the * operator, so that it can be used to join factors
+        '''
+        return self.join(other)
+
+    def marginalize(self, var):
+        '''
+        This function integrates out one variable from the domain
+        '''
+        n = len(self.domain)
+        new_domain = list(self.domain)
+        new_domain.remove(var)
+        f = self._extend(new_domain+[var]) #reorder the variables to put var last
+        
+        # Select submatricies from K and h
+        K_yy_inv = np.linalg.inv(f.K[-1:,-1:])
+        K_xx = f.K[:-1,:-1]
+        K_xy = f.K[:-1,-1:]
+        K_yx = f.K[-1:,:-1]
+        h_x = f.h[:-1]
+        h_y = f.h[-1:]
+        
+        # Use the submatricies above to calculate the updated K, h and g
+        new_K = K_xx - K_xy@K_yy_inv@K_yx
+        new_h = h_x - K_xy@K_yy_inv@h_y
+        new_g = f.g + (1/2)*(np.log(np.linalg.det(2*np.pi*K_yy_inv))+h_y.T@K_yy_inv@h_y)
+        
+        return self.__class__(new_domain, K=new_K, h=new_h,g=new_g)
+
     def evidence(self, **kwargs):
         '''
         Sets evidence which results in removal of the evidence variables
@@ -210,34 +284,7 @@ class GaussianFactor:
         new_K = K_xx
         new_h = h_x - K_xy@y
         new_g = f.g+h_y.T@y - (1/2)*y.T@K_yy@y
-        return self.__class__(new_domain, K=new_K, h=new_h,g=new_g)
-
-    def _extend(self, new_domain):
-        '''
-        This function is for adding variables to the domain, or reordering the variables in the domain
-        Note that self.domain must be contain a subset of the variables in new_domain
-        '''
-        n = len(new_domain)
-        
-        # add zeros to K and h corresponding to the new variables
-        new_K = np.zeros((len(new_domain),len(new_domain)))
-        new_K[:len(self.domain), :len(self.domain)] = self.K
-        new_h = np.zeros(len(new_domain))
-        new_h[:len(self.domain)] = self.h
-        new_g = self.g
-        old_order = list(self.domain) + list(set(new_domain)-set(self.domain))
-        # shuffle rows and columns of K according to new order
-        new_order = []
-        for v in new_domain:
-            new_order.append(old_order.index(v))
-        new_K = new_K[new_order,:]
-        new_K = new_K[:,new_order]
-
-        # shuffle h according to new order
-        new_h = new_h[new_order]
-        
-        return self.__class__(new_domain, K=new_K, h=new_h, g=new_g)
-
+        return self.__class__(new_domain, K=new_K, h=new_h,g=new_g)    
 
     def sample(self, **kwargs):
         '''
@@ -249,5 +296,10 @@ class GaussianFactor:
         sample_dict = dict((var, sample[i]) for i,var in enumerate(f.domain))
         return sample_dict
 
-
-
+    def normalize(self):
+        '''
+        Normalize the factor (will only work if the covariance is well-defined)
+        '''
+        n = len(self.domain)
+        self.g = -0.5*self.mean().T@self.h - np.log((2*np.pi)**(n/2)*np.linalg.det(self.covariance())**(1/2))
+        return self

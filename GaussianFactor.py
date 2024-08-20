@@ -1,4 +1,6 @@
 import numpy as np
+import copy
+
 class GaussianFactor:
     def __init__(self, domain, mu=None, sigma=None, parents=None, beta=None, b_mean=None, b_var=None, K=None, h=None, g=None):
         '''

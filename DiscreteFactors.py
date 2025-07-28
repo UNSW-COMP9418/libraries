@@ -120,7 +120,7 @@ class Factor:
                 f.table = f.table[slice_tuple]
                 
                 # modify the outcomeSpace to correspond to the changes just made to self.table
-            f.outcomeSpace[var] = (value,)
+                f.outcomeSpace[var] = (value,)
         return f
 
     def evidence2(self, **kwargs):

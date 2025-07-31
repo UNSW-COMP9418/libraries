@@ -119,8 +119,8 @@ class Factor:
                 slice_tuple = tuple(slice(index,index+1) if v == var else slice(None) for v in f.domain)
                 f.table = f.table[slice_tuple]
                 
-                # modify the outcomeSpace to correspond to the changes just made to self.table
-                f.outcomeSpace[var] = (value,)
+            # modify the outcomeSpace to correspond to the changes just made to self.table
+            f.outcomeSpace[var] = (value,)
         return f
 
     def evidence2(self, **kwargs):
